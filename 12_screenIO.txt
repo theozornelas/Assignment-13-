@@ -1,0 +1,59 @@
+****************************************************************
+** ASSIGNMENT #12 - GRAPH DEPTH FIRST SEARCH                  **
+** AUTHOR: Ethan Slattery && Osvaldo Moreno Ornelas           **
+** ---------------------------------------------------------- **
+** This program implements the graph data structure using the **
+** adjacency list method. The graph then uses a depth first   **
+** search starting at the Dallas vertex outputting all the    **
+** vertices and edges visited in order.                       **
+****************************************************************
+
+[Dallas]
+
+[Dallas]<--->[Houston]
+
+[Houston]
+
+[Houston]<--->[Atlanta]
+
+[Atlanta]
+
+[Atlanta]<--->[Miami]
+
+[Miami]
+
+[Kansas City]<--->[Atlanta]
+
+[Kansas City]
+
+[Chicago]<--->[Kansas City]
+
+[Chicago]
+
+[Chicago]<--->[New York]
+
+[New York]
+
+[New York]<--->[Boston]
+
+[Boston]
+
+[Denver]<--->[Chicago]
+
+[Denver]
+
+[Los Angeles]<--->[Denver]
+
+[Los Angeles]
+
+[San Francisco]<--->[Los Angeles]
+
+[San Francisco]
+
+[Seattle]<--->[San Francisco]
+
+[Seattle]
+
+
+
+I am GROOT
