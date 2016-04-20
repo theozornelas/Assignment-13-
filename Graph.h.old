@@ -18,6 +18,8 @@ using std::ostream;
 using std::cout;
 using std::endl;
 
+#include <algorithm>
+
 /**
  *
  */
@@ -61,16 +63,14 @@ public:
         void visit() { visited_ = true; }
         // Sets the state of this vertex to unvisited
         void resetVisited() { visited_ = false; }
-        // Gets the closest unvisited edge based on weight of edges
-        //EdgeItr
 
         /*** OPERATOR OVERLOADS ***/
         // Overload the output stream operator
-		friend std::ostream &operator<<(std::ostream &output, const Vertex &obj)
-		{
+		friend std::ostream &operator<<(std::ostream &output, const Vertex &obj) {
                 output << "[" << obj.data_ << "]";
                 return output;
         }
+
         // Overload for the * Operator
         E& operator*() { return data_; }
         // Overload all the comparison operators
@@ -93,11 +93,9 @@ public:
         // Basic Constructor for the edge class
         Edge(const int &weight = 0) : weight_(weight), visited_(false) {}
         // Returns vertex at the beginning of this edge
-        Vertex& start() { return *start_; }
-        VertexItr startItr() { return start_; }
+        Vertex start() { return *start_; }
         // Returns vertex at the beginning of this edge
-        Vertex& end() { return *end_; }
-        VertexItr endItr() { return end_; }
+        Vertex end() {return *end_; }
         // Returns the weight of the edge
         int weight() { return weight_; }
         // Return the end vertex of this edge distinct from vertex v
@@ -114,31 +112,50 @@ public:
         // Sets the state of this vertex to unvisited
         void resetVisited() { visited_ = false; }
 
-        void setEnd(VertexItr newEnd){end_ = newEnd;}
-        void setStart(VertexItr newStart ){start_ = newStart;}
+        void setBack(VertexItr newEnd){start_ = newEnd;}
+        void setCrossEdge(VertexItr newStart ){end_ = newStart;}
+
+ //---------------------------------------------------------------------//
+
+        /***
+         * test whether edge e is directed
+         */
+        bool isDirected(){ return false; }
+
+        //return origin vertex of edge e
+        VertexItr origin();
+
+        //return the destination vertex of edge e
+        VertexItr dest();
+
+        //returns a vertex list. first element is the origin, second is
+        //the cross edge (destination)
+        VertexList endVertices();
+
+//---------------------------------------------------------------------//
 
         /*** OPERATOR OVERLOADS ***/
         // Overload for the * Operator
         int& operator*() { return weight_; }
         // Overload the output stream operator
 		friend std::ostream &operator<<(std::ostream &output, const Edge &obj){
-				output << *(obj.start_) << "->" << *(obj.end_);
+				output << *(obj.start_) << "<--->" << *(obj.end_);
 				return output;
 		}
         // Overload all the comparison operators
         bool operator==(const Edge &other) const { return (this->weight_ == other.weight_); }
         bool operator!=(const Edge &other) const { return (this->weight_ != other.weight_); }
-        bool operator>(const Edge &other) const { return this->weight_ > other.weight_ ; }
-        bool operator<(const Edge &other) const { return this->weight_ < other.weight_ ; }
+        bool operator>(const Edge &other)  const { return this->weight_ > other.weight_ ; }
+        bool operator<(const Edge &other)  const { return this->weight_ < other.weight_ ; }
         bool operator>=(const Edge &other) const { return this->weight_ >= other.weight_ ; }
         bool operator<=(const Edge &other) const { return this->weight_ <= other.weight_ ; }
 
     private:
-        int weight_;       // weight of the edge
-        bool visited_;     // Has this Edge been visited?
-        VertexItr start_;  // Iterator to vertex at end of this edge
-        VertexItr end_;    // Iterator to vertex at end of this edge
-        EdgeItr   itr_;    // Iterator to this edge's position in Edge List
+        int weight_;            // weight of the edge
+        bool visited_;          // Has this Edge been visited?
+        VertexItr start_;    // Iterator to vertex at end of this edge
+        VertexItr end_;   // Iterator to vertex at end of this edge
+        EdgeItr   itr_;         // Iterator to this edge's position in Edge List
     };
 
     /*** GRAPH INTERFACE ***/
@@ -153,6 +170,12 @@ public:
     void insertVertex(const E& e);
     // Inserts a new undirected edge connecting 'v' and 'w' and storing 'x'
     void insertEdge(const E &v, const E &w, const int &x);
+
+    //Insert and return a new directed edge with origin v and
+    //destination w and storing element x
+    void insertDirectedEdge(const E &v, const E &w, const int& x);
+
+
     // Removes vertex 'v' and all its incident edges
 //    eraseVertex(v);
     // Removes the edge e
@@ -161,14 +184,19 @@ public:
     void print(std::ofstream &output, std::string title = "Graph Output");
     // Depth First Search Traversal of the graph. Returns an ordered VertexList
     VertexList dft(const E &e);
-    //
-    VertexList bst(const E &e);
+
+    VertexList BST(const E &e);
+
+
 
 protected:
     // Finds the vertex containing 'e' and returns an iterator to that vertex
     VertexItr findVertex(const E &e);
     // Depth First Search Traversal of the graph. Returns an ordered VertexList
     void dftHelper(Vertex &location, VertexList &outList);
+
+
+    void BSTHelper(Vertex &location);
 
 private:
     VertexList vertices_;   // List of vertex
@@ -191,6 +219,27 @@ bool Graph<E>::Vertex::isAdjacentTo(const E &v) {
         itr++;
     }
     return found;
+}
+
+template <typename E>
+void Graph<E>::insertDirectedEdge(const E &v, const E &w, const int& x)
+{
+	Edge newEdge(x);
+//	newEdge.setBack(v);
+
+	   // Find out if vertex are already in list, and get position if they are
+	    VertexItr vItr = findVertex(v);
+	    VertexItr wItr = findVertex(w);
+
+	    // Create new temporary Vertex Obj for v and w
+	    Vertex tempV(v);
+	    Vertex tempW(w);
+
+	    newEdge.setBack(vItr);
+	    newEdge.setCrossEdge(wItr);
+
+	    edges_.push_back(newEdge);
+
 }
 
 // Inserts a new undirected edge connecting 'v' and 'w' and storing 'x'
@@ -227,8 +276,8 @@ void Graph<E>::insertEdge(const E& v, const E& w, const int& x)
 #endif
 
     // Set the start and end of the edge and add it to the edge list
-    newEdge.setStart(vItr);
-    newEdge.setEnd(wItr);
+    //newEdge.setStart(vItr);
+    //newEdge.setEnd(wItr);
     edges_.push_back(newEdge);
 
     // Add the new edge to both vertex
@@ -247,14 +296,14 @@ template <typename E>
 typename Graph<E>::VertexItr  Graph<E>::Edge::opposite(Vertex v)
 {
   if(v == *start_){
-      return end_;
-  }
-  else if(v == *end_){
-      return start_;
-  }
-  else{
-	  std::cout << "***** ERROR - NODE NOT INCIDENT *****\n";std::cout.flush();
-  }
+        return end_;
+    }
+    else if(v == *end_){
+        return start_;
+    }
+    else{
+        std::cout << "***** ERROR - NODE NOT INCIDENT *****\n";std::cout.flush();
+    }
 }
 
 /**
@@ -265,22 +314,25 @@ typename Graph<E>::VertexItr  Graph<E>::Edge::opposite(Vertex v)
 template <typename E>
 void Graph<E>::print(std::ofstream &output, std::string title) {
     output << "digraph \"" << title << "\" {\n"
-              "  graph [label=\"" << title << "\", labeloc=t, fontsize=24, "
+              "  digraph [label=\"" << title << "\", labeloc=t, fontsize=24, "
               "page=\"8.5,11\", center=true, orientation=landscape, "
-              "size=\"10,7.5\", ratio=compress, overlap=false, splines=true];\n";
-
+              "size=\"10,7.5, \"ratio=compress];\n  overlap=false;\n";
+    output.flush();
     // OUTPUT THE VERTICES
     for(VertexItr itr = vertices_.begin(); itr != vertices_.end(); itr++){
         output << "  \"" << **itr << "\"";
-        output << ( (*itr).visited() ? " [style=filled, color=blue, fontcolor=white];\n"
-                                     : " [style=filled, color=black, fontcolor=white];\n");
+        output << ( (*itr).visited() ? " [style=filled, color=blue, fontcolor=white];\n" : ";\n");
     }
-
+    output.flush();
     for(EdgeItr itr = edges_.begin(); itr != edges_.end(); itr++){
-        output << "  \"" << *((*itr).start()) << "\" -> \"" << *((*itr).end()) << "\" [";
+        cout << "TEST1 \n"; cout.flush();
+        output << "  \"" << *((*itr).start()); output.flush();
+        output << "\" -> \"" << *((*itr).end()) << "\" ["; output.flush();
+        cout << "TEST2 \n"; cout.flush();
         output << "label=\"" << (*itr).weight() << "\", len=" << (*itr).weight() ;
-        output << ( (*itr).visited() ? ", style=bold, color=blue];\n"
-                                     : ", style=bold, color=orange];\n");
+        cout << "TEST3 \n"; cout.flush();
+        output << ( (*itr).visited() ? ", style=bold, color=blue];\n" : "];\n");
+        cout << "TEST4 \n"; cout.flush();
     }
 
     output << "}\n";
@@ -358,60 +410,6 @@ std::cout << location << endl << endl;
     }
 }
 
-/**
- *
- */
-template <typename E>
-typename Graph<E>::VertexList Graph<E>::bst(const E &e) {
-    // Call method to mark all vertices and edges visited
-
-    // Create the queue and list for output
-    std::list<VertexItr> queue;
-    VertexList output;
-
-    // find the vertex 'e' and get an iterator to it
-    VertexItr eItr = findVertex(e);
-
-    // Mark the first location as visited and add to queue
-    eItr->visit();
-    queue.push_back(eItr);
-
-    cout << "\n STARTING AT " << *eItr << "\n";
-    //
-    while(!queue.empty()){
-        // remove the next vertex from the queue and output it
-        eItr = queue.front();
-        output.push_back( *eItr );
-        //cout << "\n VISITING " << *eItr << "\n";
-        queue.pop_front();
-
-        // Get all the adjacent vertices from closest to farthest
-        // and if they have not been visited already add them
-        // to the queue
-        EdgeItrList edges = eItr->incidentEdges();
-        for(EdgeItrItr i = edges.begin(); i != edges.end(); i++){
-            if( !(*i)->end().visited() ){
-                cout << "\n VISITING " << *((*i)->end()) << "\n";
-                cout << **i << " Is a Discovery Edge\n";
-                (*i)->visit();        // Set this edge as a discovery edge (visited)
-                (*i)->end().visit();  // Set the edge on the far side as discovered (visited)
-                queue.push_back( (*i)->endItr() );
-            }
-        }
-    }
-
-    // OUTPUT CROSS EDGES
-    cout << "\n********************************\n";
-    cout << "*** CROSS EDGES IN THE GRAPH ***\n";
-    cout << "********************************\n";
-    for(EdgeItr j = edges_.begin(); j != edges_.end(); j++) {
-        if( !j->visited() ) {
-            cout << *j << endl;
-        }
-    }
-
-    return output;
-}
 
 /**
  *
@@ -441,15 +439,49 @@ typename Graph<E>::VertexItr Graph<E>::findVertex(const E &e) {
 template <typename E>
 bool  Graph<E>::Edge::isAdjacentTo(Edge f)
 {
-    return this->end_==f.end_ || this->start_==f.end_;
+    return false; //this->end_==f.end_ || this->start_==f.end_;
 }
 
 // Test whether this edge is incident on v (they share a common vertex)
 template <typename E>
 bool  Graph<E>::Edge::isIncidentOn(Vertex v)
 {
-    return *start_== v || *end_==v;
+    return false;// *start_== v || *end_==v;
 }
 
+template <typename E>
+void Graph<E>:: BSTHelper(Vertex &location)
+{
+	EdgeList L0;
+
+   // E vertexL  = location.incidentEdges();
+	EdgeItr it;
+	//it = L0.begin();
+
+    Edge min;
+
+    bool found = false;
+
+    for(EdgeItr eIt = location.incidentEdges().begin(); eIt != location.incidentEdges().end(); eIt++)
+    {
+        if(!(*eIt).visited())
+        {
+            (*eIt).visit();
+            L0.push_back(*eIt);
+        }
+    }
+
+   for(it = L0.begin(); it != L0.end(); it++)
+   {
+            if((*it).weight() < (*it+1).weight())
+            {
+                min = (*it);
+            }
+   }
+
+    BSTHelper(min.dest());
+
+
+}
 
 #endif //DATA_STRUCTURES_GRAPH_H

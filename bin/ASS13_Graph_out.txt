@@ -1,0 +1,38 @@
+digraph "Graph Output" {
+  graph [label="BREDTH FIRST TRAVERSAL", labeloc=t, fontsize=24, page="8.5,11", center=true, orientation=landscape, size="10,7.5", ratio=compress, overlap=false, splines=true, dpi=300];
+  "Seattle" [style=filled, color=blue, fontcolor=white];
+  "San Francisco" [style=filled, color=blue, fontcolor=white];
+  "Denver" [style=filled, color=blue, fontcolor=white];
+  "Los Angeles" [style=filled, color=blue, fontcolor=white];
+  "Chicago" [style=filled, color=blue, fontcolor=white];
+  "Kansas City" [style=filled, color=blue, fontcolor=white];
+  "New York" [style=filled, color=blue, fontcolor=white];
+  "Atlanta" [style=filled, color=blue, fontcolor=white];
+  "Boston" [style=filled, color=blue, fontcolor=white];
+  "Dallas" [style=filled, color=blue, fontcolor=white];
+  "Houston" [style=filled, color=blue, fontcolor=white];
+  "Miami" [style=filled, color=blue, fontcolor=white];
+  "Seattle" -> "San Francisco" [label="807", len=807, style=bold, color=orange];
+  "Seattle" -> "Denver" [label="1331", len=1331, style=bold, color=orange];
+  "Los Angeles" -> "Denver" [label="1015", len=1015, style=bold, color=orange];
+  "San Francisco" -> "Los Angeles" [label="381", len=381, style=bold, color=orange];
+  "Denver" -> "San Francisco" [label="1267", len=1267, style=bold, color=blue];
+  "Denver" -> "Chicago" [label="1003", len=1003, style=bold, color=orange];
+  "Chicago" -> "Seattle" [label="2097", len=2097, style=bold, color=blue];
+  "Kansas City" -> "Chicago" [label="533", len=533, style=bold, color=blue];
+  "Kansas City" -> "Denver" [label="599", len=599, style=bold, color=blue];
+  "Kansas City" -> "Los Angeles" [label="1663", len=1663, style=bold, color=blue];
+  "Kansas City" -> "New York" [label="1260", len=1260, style=bold, color=blue];
+  "Kansas City" -> "Atlanta" [label="864", len=864, style=bold, color=blue];
+  "Chicago" -> "Boston" [label="983", len=983, style=bold, color=blue];
+  "Boston" -> "New York" [label="214", len=214, style=bold, color=orange];
+  "New York" -> "Chicago" [label="787", len=787, style=bold, color=orange];
+  "New York" -> "Atlanta" [label="888", len=888, style=bold, color=orange];
+  "Dallas" -> "Los Angeles" [label="1435", len=1435, style=bold, color=orange];
+  "Dallas" -> "Kansas City" [label="496", len=496, style=bold, color=orange];
+  "Dallas" -> "Atlanta" [label="781", len=781, style=bold, color=orange];
+  "Houston" -> "Dallas" [label="239", len=239, style=bold, color=blue];
+  "Houston" -> "Atlanta" [label="810", len=810, style=bold, color=orange];
+  "Atlanta" -> "Miami" [label="661", len=661, style=bold, color=blue];
+  "Miami" -> "Houston" [label="1187", len=1187, style=bold, color=blue];
+}
